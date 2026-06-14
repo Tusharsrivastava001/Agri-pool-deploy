@@ -23,9 +23,22 @@ const transportRequestSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    date: {
+      type: Date,
+      required: true,
+    },
+    transporterId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    cropPhotoUrl: {
+      type: String,
+      default: "",
+    },
     status: {
       type: String,
-      default: "pending", // pending | matched | completed
+      enum: ["Pending", "Accepted", "In Transit", "Delivered", "Cancelled"],
+      default: "Pending",
     },
   },
   { timestamps: true }

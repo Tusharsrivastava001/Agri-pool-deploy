@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import api from "../utils/api";
-import { Phone, Lock, ArrowRight, Leaf, ShieldCheck } from "lucide-react";
+import { Phone, Lock, ArrowRight, Leaf, ShieldCheck, Github } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const [form, setForm] = useState({ phone: "", password: "" });
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -17,15 +21,16 @@ export default function Login() {
     try {
       const res = await api.post("/api/auth/login", form);
       if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
-        
-        localStorage.setItem("userId", res.data.user.id);
+        login(res.data.user, res.data.token);
+        toast.success("Login successful");
         window.location.href = "/";
       } else {
         setMessage({ text: res.data.error, type: "error" });
+        toast.error(res.data.error || "Login failed");
       }
-    } catch (err) {
+    } catch {
       setMessage({ text: "Invalid credentials or server error", type: "error" });
+      toast.error("Invalid credentials or server error");
     } finally {
       setLoading(false);
     }
@@ -110,7 +115,7 @@ export default function Login() {
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
                 <label className="text-sm font-bold text-gray-700">Password</label>
-                <a href="#" className="text-xs font-bold text-emerald-600 hover:text-emerald-700">Forgot?</a>
+                <a href="/forgot-password" className="text-xs font-bold text-emerald-600 hover:text-emerald-700">Forgot?</a>
               </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -135,6 +140,29 @@ export default function Login() {
               {!loading && <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />}
             </button>
           </form>
+
+          <div className="my-8 flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-200"></div>
+            <span className="text-xs font-bold uppercase text-gray-400">or continue with</span>
+            <div className="h-px flex-1 bg-gray-200"></div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <a
+              href={`${apiBaseUrl}/api/oauth/google`}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 font-bold text-gray-700 transition hover:border-emerald-400 hover:text-emerald-700"
+            >
+              <span className="text-lg font-black text-red-500">G</span>
+              Google
+            </a>
+            <a
+              href={`${apiBaseUrl}/api/oauth/github`}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 font-bold text-gray-700 transition hover:border-emerald-400 hover:text-emerald-700"
+            >
+              <Github size={20} />
+              GitHub
+            </a>
+          </div>
 
           <p className="text-center mt-10 text-gray-600 font-medium">
             New to AgriPool?{" "}

@@ -1,35 +1,24 @@
 const express = require("express");
-const TransportRequest = require("../models/TransportRequest");
-
+const transportController = require("../controllers/transportController");
+const { verifyToken, checkRole } = require("../middleware/auth");
+const { upload } = require("../config/cloudinary");
 const router = express.Router();
 
-// CREATE TRANSPORT REQUEST
-router.post("/request", async (req, res) => {
-  try {
-    const { userId, cropName, quantity, pickupLocation, destination } = req.body;
-
-    if (!userId) {
-      return res.status(401).json({ error: "User not logged in" });
+const uploadCropPhoto = (req, res, next) => {
+  upload.single("cropPhoto")(req, res, (error) => {
+    if (error) {
+      return res.status(400).json({ error: error.message || "Unable to upload crop photo" });
     }
+    next();
+  });
+};
 
-    const newRequest = new TransportRequest({
-      userId,
-      cropName,
-      quantity,
-      pickupLocation,
-      destination,
-    });
-
-    await newRequest.save();
-
-    res.json({
-      message: "Transport request saved successfully",
-      request: newRequest,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
+router.post("/request", verifyToken, checkRole("farmer"), uploadCropPhoto, transportController.createRequest);
+router.get("/open", verifyToken, checkRole("transporter"), transportController.getOpenRequests);
+router.get("/my-requests", verifyToken, checkRole("farmer"), transportController.getMyRequests);
+router.get("/assigned", verifyToken, checkRole("transporter"), transportController.getAssignedRequests);
+router.put("/:id/accept", verifyToken, checkRole("transporter"), transportController.acceptRequest);
+router.put("/:id/status", verifyToken, checkRole("transporter"), transportController.updateStatus);
+router.put("/:id/cancel", verifyToken, checkRole("farmer"), transportController.cancelRequest);
 
 module.exports = router;

@@ -6,7 +6,12 @@ const fertilizerSchema = new mongoose.Schema({
   crop: { type: String, required: true },
   soilType: { type: String, required: true },
   season: { type: String, required: true },
-  date: { type: Date, default: Date.now }
-});
+  aiResponse: {
+    fertilizers: [{ name: String, quantity: String, purpose: String }],
+    schedule: [String],
+    warnings: [String],
+    summary: String
+  },
+}, { timestamps: true });
 
 module.exports = mongoose.model("Fertilizer", fertilizerSchema);

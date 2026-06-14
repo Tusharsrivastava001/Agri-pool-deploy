@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import api from "../utils/api";
-import { User, Phone, Lock, UserCog, ArrowRight, Leaf, Users, CheckCircle } from "lucide-react";
+import { User, Phone, Lock, UserCog, ArrowRight, Leaf, Users, CheckCircle, Github } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Register() {
-  const [form, setForm] = useState({ name: "", phone: "", password: "", role: "farmer" });
+  const [form, setForm] = useState({ name: "", phone: "", email: "", password: "", role: "farmer" });
   const [message, setMessage] = useState({ text: "", type: "" });
   const [loading, setLoading] = useState(false);
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -20,10 +22,12 @@ export default function Register() {
         text: res.data.message || "Account created! You can now login.", 
         type: "success" 
       });
+      toast.success("Account created. Please login.");
       // Optional: Redirect to login after 2 seconds
       // setTimeout(() => window.location.href = "/login", 2000);
     } catch (err) {
       setMessage({ text: "Registration failed. Try again.", type: "error" });
+      toast.error(err.response?.data?.error || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -125,6 +129,22 @@ export default function Register() {
               </div>
             </div>
 
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-400 uppercase ml-1">Email Address</label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="name@gmail.com"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white border border-gray-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all"
+                />
+              </div>
+            </div>
+
             {/* Password */}
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-400 uppercase ml-1">Password</label>
@@ -168,6 +188,29 @@ export default function Register() {
               {!loading && <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />}
             </button>
           </form>
+
+          <div className="my-8 flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-200"></div>
+            <span className="text-xs font-bold uppercase text-gray-400">or sign up with</span>
+            <div className="h-px flex-1 bg-gray-200"></div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <a
+              href={`${apiBaseUrl}/api/oauth/google`}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 font-bold text-gray-700 transition hover:border-emerald-400 hover:text-emerald-700"
+            >
+              <span className="text-lg font-black text-red-500">G</span>
+              Google
+            </a>
+            <a
+              href={`${apiBaseUrl}/api/oauth/github`}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 font-bold text-gray-700 transition hover:border-emerald-400 hover:text-emerald-700"
+            >
+              <Github size={20} />
+              GitHub
+            </a>
+          </div>
 
           <p className="text-center mt-8 text-gray-600 font-medium">
             Already have an account?{" "}

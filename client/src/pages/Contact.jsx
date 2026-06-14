@@ -25,7 +25,7 @@ const Contact = () => {
         setStatus({ loading: false, message: "Message sent! We'll get back to you soon.", type: 'success' });
         setFormData({ name: '', email: '', subject: '', message: '' });
       }
-    } catch (err) {
+    } catch {
       setStatus({ loading: false, message: "Oops! Something went wrong. Try again.", type: 'error' });
     }
   };

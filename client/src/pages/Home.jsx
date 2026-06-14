@@ -11,10 +11,11 @@ const Home = () => {
     const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
     // If you saved the name in localStorage during login, get it here
-    const userName = localStorage.getItem("userName") || "Farmer"; 
+    const userName = localStorage.getItem("userName") || "Farmer";
+    const userRole = localStorage.getItem("userRole") || "farmer";
 
     if (userId && token) {
-      setUser({ id: userId, name: userName });
+      setUser({ id: userId, name: userName, role: userRole });
     }
   }, []);
 
@@ -43,8 +44,13 @@ const Home = () => {
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-gray-600">
               <Link to="/" className="hover:text-emerald-600 transition-colors">Home</Link>
-              <Link to="/transport" className="hover:text-emerald-600 transition-colors">Transport Hub</Link>
-              <Link to="/fertilizer" className="hover:text-emerald-600 transition-colors">Precision Plans</Link>
+              {(!user || user.role === "farmer") && <Link to="/transport" className="hover:text-emerald-600 transition-colors">Transport Hub</Link>}
+              {(!user || user.role === "farmer") && <Link to="/fertilizer" className="hover:text-emerald-600 transition-colors">AI Plans</Link>}
+              {user?.role === "farmer" && <Link to="/my-bookings" className="hover:text-emerald-600 transition-colors">My Bookings</Link>}
+              {user?.role === "transporter" && <Link to="/transporter-dashboard" className="hover:text-emerald-600 transition-colors">Transporter Dashboard</Link>}
+              {user?.role === "admin" && <Link to="/admin" className="hover:text-emerald-600 transition-colors">Admin</Link>}
+              {user && <Link to="/weather" className="hover:text-emerald-600 transition-colors">Weather</Link>}
+              {user && <Link to="/mandi" className="hover:text-emerald-600 transition-colors">Mandi</Link>}
               <Link to="/about" className="hover:text-emerald-600 transition-colors">About Us</Link>
             </div>
 
