@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import api from "../utils/api";
-import { Phone, Lock, ArrowRight, Leaf, ShieldCheck, Github } from "lucide-react";
+import { Phone, Lock, ArrowRight, Leaf, ShieldCheck } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -147,20 +147,13 @@ export default function Login() {
             <div className="h-px flex-1 bg-gray-200"></div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-3">
             <a
               href={`${apiBaseUrl}/api/oauth/google`}
-              className="flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 font-bold text-gray-700 transition hover:border-emerald-400 hover:text-emerald-700"
+              className="flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 font-bold text-gray-700 transition hover:border-emerald-400 hover:text-emerald-700 w-full"
             >
               <span className="text-lg font-black text-red-500">G</span>
               Google
-            </a>
-            <a
-              href={`${apiBaseUrl}/api/oauth/github`}
-              className="flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 font-bold text-gray-700 transition hover:border-emerald-400 hover:text-emerald-700"
-            >
-              <Github size={20} />
-              GitHub
             </a>
           </div>
 
