@@ -19,8 +19,12 @@ const adminRoutes = require("./routes/admin");
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: [
+      'http://localhost:5173',
+      'https://agri-pool-deploy-six.vercel.app'
+    ],
     methods: ["GET", "POST", "PUT"],
+    credentials: true
   },
 });
 
@@ -36,7 +40,13 @@ io.on("connection", (socket) => {
   });
 });
 
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://agri-pool-deploy-six.vercel.app'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(passport.initialize());
 app.use((req, res, next) => {
