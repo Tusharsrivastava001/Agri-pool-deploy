@@ -3,8 +3,19 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GitHubStrategy = require("passport-github2").Strategy;
 const User = require("../models/user");
 
-const DEFAULT_SERVER_ROOT = "http://localhost:5000";
-const SERVER_ROOT = process.env.SERVER_ROOT || DEFAULT_SERVER_ROOT;
+const normalizeBaseUrl = (value, fallback) => {
+  if (!value) return fallback;
+  return value.replace(/\/+$/, "");
+};
+
+const SERVER_ROOT = normalizeBaseUrl(
+  process.env.SERVER_ROOT ||
+    process.env.BACKEND_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ""),
+  "http://localhost:5000"
+);
+
 const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || `${SERVER_ROOT}/api/oauth/google/callback`;
 const GITHUB_CALLBACK_URL = process.env.GITHUB_CALLBACK_URL || `${SERVER_ROOT}/api/oauth/github/callback`;
 
@@ -13,16 +24,18 @@ console.log("[passport] GitHub callback URL:", GITHUB_CALLBACK_URL);
 
 const upsertOAuthUser = async ({ provider, providerId, name, email, profilePicture }) => {
   const providerField = provider === "google" ? "googleId" : "githubId";
+  const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+
   let user = await User.findOne({ [providerField]: providerId });
 
-  if (!user && email) {
-    user = await User.findOne({ email: email.toLowerCase() });
+  if (!user && normalizedEmail) {
+    user = await User.findOne({ email: normalizedEmail });
   }
 
   if (!user) {
     user = new User({
       name: name || `${provider} user`,
-      email: email?.toLowerCase(),
+      email: normalizedEmail || undefined,
       [providerField]: providerId,
       profilePicture,
       authProvider: provider,
@@ -32,7 +45,7 @@ const upsertOAuthUser = async ({ provider, providerId, name, email, profilePictu
     user[providerField] = providerId;
     user.authProvider = user.authProvider || provider;
     if (!user.profilePicture && profilePicture) user.profilePicture = profilePicture;
-    if (!user.email && email) user.email = email.toLowerCase();
+    if (!user.email && normalizedEmail) user.email = normalizedEmail;
   }
 
   await user.save();
@@ -78,7 +91,8 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
         try {
           const primaryEmail =
             profile.emails?.find((item) => item.primary)?.value ||
-            profile.emails?.[0]?.value;
+            profile.emails?.[0]?.value ||
+            "";
 
           const user = await upsertOAuthUser({
             provider: "github",
